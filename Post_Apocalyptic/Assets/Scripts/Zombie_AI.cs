@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Zombie_Movement))]
+[RequireComponent(typeof(Zombie_AV))]
 public class Zombie_AI : MonoBehaviour
 {
+    //Required Components
     private Zombie_Movement movement;
     private Zombie_AV zombie_av;
 
@@ -15,6 +17,8 @@ public class Zombie_AI : MonoBehaviour
         Attacking,
         Chasing
     }
+
+    [Header("Zombie Intelligence Configuration")]
     [SerializeField] private float think_every_seconds = 0.2f;
     //Indicates zombies current action
     public Zombie_State zombie_state = Zombie_State.Wander;
@@ -25,6 +29,7 @@ public class Zombie_AI : MonoBehaviour
         movement = GetComponent<Zombie_Movement>();
         zombie_av = GetComponent<Zombie_AV>();
 
+        //Start thinking. (Coroutines are called every specified seconds)
         StartCoroutine(Think());
     }
 

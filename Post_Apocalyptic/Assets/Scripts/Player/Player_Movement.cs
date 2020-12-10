@@ -42,7 +42,6 @@ public class Player_Movement : MonoBehaviour
     {
         //Checks if player is touching ground.
         is_grounded = Physics.CheckSphere(ground_check.position, ground_distance, ground_mask);
-
         //If player is on ground apply a little force to him.
         if (is_grounded && velocity.y < 0)
         {
@@ -65,7 +64,11 @@ public class Player_Movement : MonoBehaviour
     //Jump based on the vertical Jump Physics Equation
     public void Jump()
     {
-        velocity.y = Mathf.Sqrt(jump_height * -2f * gravity);
+        if(is_grounded)
+        {
+            velocity.y = Mathf.Sqrt(jump_height * -2f * gravity);
+        }
+        
     }
 
     //Change from Sprint to Walk

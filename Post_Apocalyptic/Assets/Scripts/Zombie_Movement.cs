@@ -7,14 +7,17 @@ using UnityEngine;
 [RequireComponent(typeof(NavMeshAgent))]
 public class Zombie_Movement : MonoBehaviour
 {
+    [Header("Chasing Configuration:")]
     [SerializeField] private float chase_range;
+    [SerializeField] private float chase_acceleration;
+    [Header("Wander Configuration:")]
     [SerializeField] private float wander_range;
     [SerializeField] private float wander_time;
-    [SerializeField] private float move_acceleration;
-    [SerializeField] private float run_acceleration;
-
+    [SerializeField] private float wander_acceleration;
+    [Header("Zombie's Target:")]
     [SerializeField] private Transform target;
-
+    
+    //Required Component
     NavMeshAgent agent;
     
     // Start is called before the first frame update
@@ -23,18 +26,10 @@ public class Zombie_Movement : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
     }
 
-    private void LateUpdate()
-    {
-        if(IsTargetInRange())
-        {
-            Vector3 direction = (target.position - transform.position).normalized;
-            Quaternion qDir = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, qDir, 40f * Time.deltaTime);
-        }
-    }
-
+    //Checks If target is in range
     public bool IsTargetInRange()
     {
+        //If target is inside AI's range
         if (Vector3.Distance(transform.position, target.position) < chase_range)
         {
             return true;
@@ -45,63 +40,55 @@ public class Zombie_Movement : MonoBehaviour
         }
     }
 
+    //Starts the Wander Coroutine
     public void MoveAround()
     {
-        if (!agent.updateRotation)
-        {
-            agent.acceleration = move_acceleration;
-            agent.updateRotation = true;
-        }
+        agent.acceleration = wander_acceleration;
         StartCoroutine(Wander());
     }
 
-    public void StayIdle()
-    {
-        return;
-    }
-
+    //Chase Target If it's in range
     public void ChaseTarget()
     {
         if(IsTargetInRange())
         {
-            
-            if(agent.updateRotation)
-            {
-                agent.updateRotation = false;
-                agent.acceleration = run_acceleration;
-            }
-            
+            agent.acceleration = chase_acceleration;
+            //Start Following Player
             agent.SetDestination(target.position);
         }
-        
     }
 
+    //Start Wandering (Move to random positions inside NavMesh area)
     IEnumerator Wander()
     {
-
-        Vector3 newPos = RandomNavSphere(transform.position, wander_range, -1);
-        agent.SetDestination(newPos);
-
+        //Set destination to a random spot
+        Vector3 new_pos = RandomNavSphere(transform.position, wander_range, -1);
+        agent.SetDestination(new_pos);
+        //Change position every wander_time seconds
         yield return new WaitForSeconds(wander_time);
     }
 
-    public Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask)
+    //Sets AI's destination in a random spot inside the walkable NavMesh area
+    private Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask)
     {
+        //Create an invisible Check Sphere of specified range
         Vector3 randDirection = Random.insideUnitSphere * dist;
-
+        //Direction changes based on current position
         randDirection += origin;
-
+        //Get a random spot inside the check sphere
         NavMeshHit navHit;
-
         NavMesh.SamplePosition(randDirection, out navHit, dist, layermask);
-
+        //Return the destination
         return navHit.position;
     }
 
+    //Checks if AI has reached its destination
     public bool HasReachedDestination()
     {
+        //If you arived on the desired position
         if(agent.remainingDistance <= agent.stoppingDistance)
         {
+            //Set again the AI's destination (Because when it reaches its destination it resets)
             agent.destination = target.position;
             return true;
         }
@@ -109,6 +96,5 @@ public class Zombie_Movement : MonoBehaviour
         {
             return false;
         }
-        
     }
 }

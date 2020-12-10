@@ -62,7 +62,7 @@ public class Player_AV : MonoBehaviour
         //Show Canvas
         scope_canvas.SetActive(true);
         //Change field of view (scope)
-        Camera.main.fieldOfView = 40f;
+        Camera.main.fieldOfView = 20f;
         //Change cullingMask (what camera sees) to not see player gun
         Camera.main.cullingMask = (1 << LayerMask.NameToLayer("TransparentFX")) |
                                   (1 << LayerMask.NameToLayer("Default")) |
